@@ -5,6 +5,8 @@ use Closure;
 use Cron\CronExpression;
 use Carbon\Carbon;
 use think\Cache;
+use think\console\Input;
+use think\console\Output;
 
 abstract class Task
 {
@@ -29,9 +31,17 @@ abstract class Task
     protected $filters = [];
     protected $rejects = [];
 
-    public function __construct()
+    /** @var  Input */
+    protected $input;
+
+    /** @var  Output */
+    protected $output;
+
+    public function __construct(Input $input,Output $output)
     {
         $this->configure();
+        $this->input = $input;
+        $this->output = $output;
     }
 
     /**
@@ -156,5 +166,23 @@ abstract class Task
         $this->onOneServer = true;
 
         return $this;
+    }
+
+    /**
+     * 把信息美化输出到屏幕上
+     * @param $info
+     * @param $newline
+     * @return void
+     */
+    public function echoInfo($info,$newline=false){
+        if($this->input->getOption('origin')){
+            if($newline){
+                echo $info.PHP_EOL;
+            }else{
+                echo $info;
+            }
+        }else{
+            $this->output->write($info,$newline);
+        }
     }
 }

@@ -3,6 +3,8 @@
 ## 安装方法
 ```
 composer require ieras/think-cron
+# 如果上面的命令按照不上执行下面的
+composer require ieras/think-cron --with-all-dependencies
 ```
 
 ## 使用方法
@@ -21,6 +23,7 @@ class DemoTask extends Task
 
     public function configure()
     {
+        //$this->everyMinute();//每分钟
         $this->daily(); //设置任务的周期，每天执行一次，更多的方法可以查看源代码，都有注释
     }
 
@@ -31,6 +34,9 @@ class DemoTask extends Task
     protected function execute()
     {
         //...具体的任务执行
+        $time = date('Y-m-d H:i:s');
+        $this->echoInfo("<info>{$time}</info>\n",true);//美化输出信息
+        return true;
     }
 }
 

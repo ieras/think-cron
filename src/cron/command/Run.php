@@ -4,6 +4,7 @@ namespace ieras\cron\command;
 use think\Config;
 use think\console\Command;
 use think\console\Input;
+use think\console\input\Option;
 use think\console\Output;
 use ieras\cron\Task;
 use Carbon\Carbon;
@@ -16,7 +17,9 @@ class Run extends Command
     protected function configure()
     {
         $this->startedAt = Carbon::now();
-        $this->setName('cron:run');
+        $this->setName('cron:run')
+            ->addOption('origin', null, Option::VALUE_NONE, 'origin info output')
+            ->setDescription('Running crontab tasks');
     }
 
     public function execute(Input $input, Output $output)
@@ -25,26 +28,19 @@ class Run extends Command
         $tasks = Config::get('cron.tasks');
 
         foreach ($tasks as $taskClass) {
-
             if (is_subclass_of($taskClass, Task::class)) {
-
                 /** @var Task $task */
-                $task = new $taskClass();
+                $task = new $taskClass($input,$output);
                 if ($task->isDue()) {
-
-                    if (!$task->filtersPass()) {
+                    if (!$task->filtersPass())
                         continue;
-                    }
-
                     if ($task->onOneServer) {
-                        $this->runSingleServerTask($task);
+                        $this->runSingleServerTask($task,$taskClass);
                     } else {
-                        $this->runTask($task);
+                        $this->runTask($task,$taskClass);
                     }
-
-                    $output->writeln("Task {$taskClass} run at " . Carbon::now());
+                    //$output->writeln("Task {$taskClass} run at " . Carbon::now());
                 }
-
             }
         }
     }
@@ -63,10 +59,10 @@ class Run extends Command
         return true;
     }
 
-    protected function runSingleServerTask($task)
+    protected function runSingleServerTask($task,$taskClass)
     {
         if ($this->serverShouldRun($task)) {
-            $this->runTask($task);
+            $this->runTask($task,$taskClass);
         } else {
             $this->output->writeln('<info>Skipping task (has already run on another server):</info> ' . get_class($task));
         }
@@ -75,10 +71,11 @@ class Run extends Command
     /**
      * @param $task Task
      */
-    protected function runTask($task)
+    protected function runTask($task,$taskClass)
     {
-        echo "<warning>⏳|".date('Y-m-d H:i:s')."|Processing:{$taskClass}</warning>\r\n";
+        $task->echoInfo("<warning>⏳|".date('Y-m-d H:i:s')."|Processing:{$taskClass}</warning>",true);
         $task->run();
-        echo "<question>⌛️|".date('Y-m-d H:i:s')."|Processed:{$taskClass}</question>";
+        $task->echoInfo("<question>⌛️|".date('Y-m-d H:i:s')."|Processed:{$taskClass}</question>");
     }
+
 }
