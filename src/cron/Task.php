@@ -3,11 +3,19 @@ namespace ieras\cron;
 
 use Closure;
 use Cron\CronExpression;
+use Jenssegers\Date\Date;
+use think\Cache;
 
 abstract class Task
 {
+
+    use ManagesFrequencies;
+
+    /** @var \DateTimeZone|string 时区 */
+    public $timezone;
+
     /** @var string 任务周期 */
-    public $exptime = '* * * * *';
+    public $expression = '* * * * * *';
 
     /** @var bool 任务是否可以重叠执行 */
     public $withoutOverlapping = false;
@@ -20,20 +28,10 @@ abstract class Task
 
     protected $filters = [];
     protected $rejects = [];
-    
-    //@var array 附加参数
-    public $payload = [];
-    
-    //@var string 任务处理结果
-    public $statusDesc = null;
 
-    public function __construct($tasktime=false)
+    public function __construct()
     {
-        if($tasktime){
-            $this->exptime = $tasktime;
-        }else{
-            $this->configure();
-        }
+        $this->configure();
     }
 
     /**
@@ -42,25 +40,9 @@ abstract class Task
      */
     public function isDue()
     {
-        return CronExpression::factory($this->exptime)->isDue();
-    }
+        $date = Date::now($this->timezone);
 
-    /**
-     * 下一次执行
-     * @return bool
-     */
-    public function NextRun($datatime=null)
-    {
-        return CronExpression::factory($this->exptime)->getNextRunDate($datatime)->format('Y-m-d H:i:s');
-    }
-
-    /**
-     * 上一次执行
-     * @return bool
-     */
-    public function LastRun($datatime=null)
-    {
-        return CronExpression::factory($this->exptime)->getNextRunDate($datatime)->format('Y-m-d H:i:s');
+        return CronExpression::factory($this->expression)->isDue($date->toDateTimeString());
     }
 
     /**
@@ -68,7 +50,6 @@ abstract class Task
      */
     protected function configure()
     {
-        
     }
 
     /**
@@ -81,7 +62,7 @@ abstract class Task
     {
         if ($this->withoutOverlapping &&
             !$this->createMutex()) {
-            return false;
+            return;
         }
 
         register_shutdown_function(function () {
@@ -89,7 +70,7 @@ abstract class Task
         });
 
         try {
-            return $this->execute();
+            $this->execute();
         } finally {
             $this->removeMutex();
         }
@@ -127,14 +108,14 @@ abstract class Task
 
     protected function removeMutex()
     {
-        return cache($this->mutexName(),null);
+        return Cache::rm($this->mutexName());
     }
 
     protected function createMutex()
     {
         $name = $this->mutexName();
-        if (!cache($name)) {
-            cache($name, true, $this->expiresAt);
+        if (!Cache::has($name)) {
+            Cache::set($name, true, $this->expiresAt);
             return true;
         }
         return false;
@@ -142,7 +123,7 @@ abstract class Task
 
     protected function existsMutex()
     {
-        return cache($this->mutexName());
+        return Cache::has($this->mutexName());
     }
 
     public function when(Closure $callback)
