@@ -64,3 +64,5 @@ php think cron:schedule
 ~~~
 * * * * * php /path/to/think cron:run >> /dev/null 2>&1
 ~~~
+### 鸣谢
+- [yunwuxin/think-cron](https://packagist.org/packages/yunwuxin/think-cron/)

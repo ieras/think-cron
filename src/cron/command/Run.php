@@ -6,15 +6,16 @@ use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 use ieras\cron\Task;
+use Carbon\Carbon;
 
 class Run extends Command
 {
-    /** @var Date */
+    /** @var Carbon */
     protected $startedAt;
 
     protected function configure()
     {
-        $this->startedAt = Date::now();
+        $this->startedAt = Carbon::now();
         $this->setName('cron:run');
     }
 
@@ -41,7 +42,7 @@ class Run extends Command
                         $this->runTask($task);
                     }
 
-                    $output->writeln("Task {$taskClass} run at " . Date::now());
+                    $output->writeln("Task {$taskClass} run at " . Carbon::now());
                 }
 
             }

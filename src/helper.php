@@ -1,8 +1,9 @@
 <?php
 use ieras\cron\command\Run;
 use ieras\cron\command\Schedule;
+use think\Console;
 
-\think\Console::addDefaultCommands([
+Console::addDefaultCommands([
     Run::class,
     Schedule::class
 ]);

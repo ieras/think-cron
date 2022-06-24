@@ -3,7 +3,7 @@ namespace ieras\cron;
 
 use Closure;
 use Cron\CronExpression;
-use Jenssegers\Date\Date;
+use Carbon\Carbon;
 use think\Cache;
 
 abstract class Task
@@ -40,7 +40,7 @@ abstract class Task
      */
     public function isDue()
     {
-        $date = Date::now($this->timezone);
+        $date = Carbon::now($this->timezone);
 
         return CronExpression::factory($this->expression)->isDue($date->toDateTimeString());
     }
