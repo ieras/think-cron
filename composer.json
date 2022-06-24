@@ -1,0 +1,33 @@
+{
+    "name": "ieras/think-cron",
+    "description": "thinkphp5.0+ 计划任务 分钟级别",
+    "type": "think-extend",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "ieras",
+            "email": "ieras@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "topthink/think-installer": "^1.0",
+        "mtdowling/cron-expression": "^1.2"
+    },
+    "require-dev": {
+        "topthink/framework": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ieras\\cron\\": "src/cron"
+        },
+        "files": [
+            "src/helper.php"
+        ]
+    },
+    "extra": {
+        "think-config": {
+            "cron": "src/config.php"
+        }
+    }
+}
