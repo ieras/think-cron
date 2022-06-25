@@ -4,7 +4,6 @@ namespace ieras\cron;
 use Closure;
 use Cron\CronExpression;
 use Carbon\Carbon;
-use think\Cache;
 use think\console\Input;
 use think\console\Output;
 
@@ -117,14 +116,14 @@ abstract class Task
 
     protected function removeMutex()
     {
-        return Cache::rm($this->mutexName());
+        return cache($this->mutexName(),null);
     }
 
     protected function createMutex()
     {
         $name = $this->mutexName();
-        if (!Cache::has($name)) {
-            Cache::set($name, true, $this->expiresAt);
+        if (!cache($name)) {
+            cache($name, true, $this->expiresAt);
             return true;
         }
         return false;
@@ -132,7 +131,7 @@ abstract class Task
 
     protected function existsMutex()
     {
-        return Cache::has($this->mutexName());
+        return cache($this->mutexName());
     }
 
     public function when(Closure $callback)

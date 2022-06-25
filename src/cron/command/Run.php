@@ -1,7 +1,6 @@
 <?php
 namespace ieras\cron\command;
 
-use think\Config;
 use think\console\Command;
 use think\console\Input;
 use think\console\input\Option;
@@ -24,7 +23,7 @@ class Run extends Command
 
     public function execute(Input $input, Output $output)
     {
-        $tasks = Config::get('cron.tasks');
+        $tasks = config('cron.tasks');
         foreach ($tasks as $taskClass) {
             if (is_subclass_of($taskClass, Task::class)) {
                 /** @var Task $task */
@@ -37,7 +36,6 @@ class Run extends Command
                     } else {
                         $this->runTask($task,$taskClass);
                     }
-                    //$output->writeln("Task {$taskClass} run at " . Carbon::now());
                 }
             }
         }
