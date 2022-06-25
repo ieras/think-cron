@@ -84,7 +84,6 @@ abstract class Task
         } finally {
             $this->removeMutex();
         }
-
     }
 
     /**
@@ -170,6 +169,13 @@ abstract class Task
 
     /**
      * 把信息美化输出到屏幕上
+     * 支持的格式
+     * <info>信息</info>
+     * <error>信息</error>
+     * <comment>信息</comment>
+     * <question>信息</question>
+     * <highlight>信息</highlight>
+     * <warning>信息</warning>
      * @param $info
      * @param $newline
      * @return void

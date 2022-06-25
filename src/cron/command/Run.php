@@ -24,9 +24,7 @@ class Run extends Command
 
     public function execute(Input $input, Output $output)
     {
-
         $tasks = Config::get('cron.tasks');
-
         foreach ($tasks as $taskClass) {
             if (is_subclass_of($taskClass, Task::class)) {
                 /** @var Task $task */
